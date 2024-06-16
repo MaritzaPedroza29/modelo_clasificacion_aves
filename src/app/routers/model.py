@@ -1,14 +1,21 @@
-from fastapi.responses import StreamingResponse
-from fastapi import APIRouter
+from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi import APIRouter, FastAPI, File, UploadFile
 import pandas as pd
-import io
+from PIL import Image
+from io import BytesIO
 from app.services.model import clasificar
 from app.utils.getVectorIMG import getVectorIMG
 
-model = APIRouter(tags=['Model'])
+model_predict = APIRouter(tags=['Model'])
 
-@get_predict.get("/model", response_class=StreamingResponse, summary="recibe imagen y retorna nomb re d ela clase maokdans", description="blablabla")
-def predict(img):
-    vector = getVectorIMG(img)
-    pred = clasificar(vector)
-    return pred
+@model_predict.post("/model", response_class=StreamingResponse)
+async def predict(file: UploadFile = File(...)):
+    print("aquí")
+    image = Image.open(BytesIO(await file.read()))
+    vector = getVectorIMG(image)
+    pred_class, max_probability = clasificar(vector)
+    # Convertir max_probability a float para asegurar que sea serializable a JSON
+    max_probability = float(max_probability)
+    
+    # Crear el JSON response
+    return JSONResponse({"class": pred_class, "probability": max_probability})

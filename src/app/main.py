@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(docs_url="/", redoc_url=None)
-from app.routers.model import model
+from app.routers.model import model_predict
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,4 +12,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(model)
+app.include_router(model_predict)
